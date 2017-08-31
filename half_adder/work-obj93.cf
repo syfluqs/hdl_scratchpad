@@ -1,7 +1,0 @@
-v 4
-file . "half_adder_tb.vhdl" "4142703f430141e14b9b125ff2761e35ab7221e8" "20170829164532.627":
-  entity half_adder_tb at 1( 0) + 0 on 15;
-  architecture test of half_adder_tb at 7( 88) + 0 on 16;
-file . "half_adder.vhdl" "14b30e7adc54f13a00ca760dcae8188861f74fba" "20170829164059.803":
-  entity half_adder at 1( 0) + 0 on 13;
-  architecture behave of half_adder at 13( 193) + 0 on 14;
