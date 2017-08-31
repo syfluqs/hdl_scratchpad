@@ -7,8 +7,7 @@ end full_adder_tb;
 architecture behavior of full_adder_tb is
 component full_adder is
 port (
-        a,b,c : in std_logic;
-        s,co  : out std_logic);
+        a,b,c : in std_logic; s,co  : out std_logic);
 end component;
 
 signal input  : std_logic_vector(2 downto 0);

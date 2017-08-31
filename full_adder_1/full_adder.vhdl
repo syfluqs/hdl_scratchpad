@@ -3,8 +3,7 @@ use ieee.std_logic_1164.all;
 
 entity full_adder is
     port (
-        a,b,c : in std_logic;
-        s,co  : out std_logic);
+        a,b,c : in std_logic; s,co  : out std_logic);
 end;
 
 architecture behavioral of full_adder is
