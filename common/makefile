@@ -31,7 +31,7 @@ run_simulation: eval_if eval_entity eval_ghw $(in) $(entity)
 .PHONY: waveform
 waveform: eval_if eval_entity eval_ghw $(in) $(ghw)
 	@echo -e "\033[1m* Running gtkwave for \033[4m$(ghw)\033[0m"
-	@gtkwave $(ghw)
+	@gtkwave $(ghw) -r ../common/gtkwaverc
 
 .PHONY: syntax
 syntax: $(in)
