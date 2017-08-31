@@ -1,7 +1,7 @@
 #!/bin/sh
 
-cat $in | grep -w 'in' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > in_tokens_tempfile;
-cat $in | grep -w 'out' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > out_tokens_tempfile;
+cat $in | sed 's/;/\n/g' | grep -w 'in' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > in_tokens_tempfile;
+cat $in | sed 's/;/\n/g' | grep -w 'out' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > out_tokens_tempfile;
 let nin=$(cat in_tokens_tempfile | wc -l)-1;
 let nout=$(cat out_tokens_tempfile | wc -l)-1;
 echo -e "library ieee;\nuse ieee.std_logic_1164.all;\n
