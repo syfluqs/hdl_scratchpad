@@ -1,73 +1,192 @@
 ghdl := ghdl
 gtkwave := gtkwave
-in = main.vhdl
+in = 0
+entity = 0
+std = 08
+
 
 .PHONY: make
-make: $(in) syntax import build run_simulation waveform
+make: 
+	@$(MAKE) --no-print-directory syntax
+	@$(MAKE) --no-print-directory import
+	@$(MAKE) --no-print-directory build
+	@$(MAKE) --no-print-directory run_simulation
+	@$(MAKE) --no-print-directory waveform
+
+
+.PHONY: nowave
+nowave: 
+	@$(MAKE) --no-print-directory syntax
+	@$(MAKE) --no-print-directory import
+	@$(MAKE) --no-print-directory build
+	@$(MAKE) --no-print-directory run_simulation
+
+.PHONY: test_entity
+test_entity: get_entity_name
+	@$(MAKE) --no-print-directory testbench
+	@$(MAKE) --no-print-directory import
+	@$(eval entity=$(shell cat .entity_name))
+	@$(MAKE) --no-print-directory import in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@$(MAKE) --no-print-directory build in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@$(MAKE) --no-print-directory run_simulation in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@$(MAKE) --no-print-directory waveform in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@rm -f .entity_name
+
+.PHONY: test_entity_nowave
+test_entity_nowave: get_entity_name
+	@$(MAKE) --no-print-directory testbench
+	@$(MAKE) --no-print-directory import
+	@$(eval entity=$(shell cat .entity_name))
+	@$(MAKE) --no-print-directory import in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@$(MAKE) --no-print-directory build in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@$(MAKE) --no-print-directory run_simulation in=$(entity)_tb.vhdl entity=$(entity)_tb
+	@rm -f .entity_name
 
 .PHONY: clean
 clean: 
 	@find . -type f ! \( -name '*.vhdl' -o -name '*.vhd' -o -name 'makefile' \) -delete
 
-.PHONY: import
-import: eval_if $(in) eval_entity eval_ghw 
-	@echo -e "\033[1m* Importing \033[4m$(in)\033[0m\033[1m into current work cache\033[0m"
-	$(ghdl) -i $(in)
 
-.PHONY: build
-build: eval_if eval_entity eval_ghw $(in)
-	@#@echo $(filter-out $@,$(MAKECMDGOALS) | cut -f 2 -d ' ')
-	@echo -e "\033[1m* Building \033[4m$(in)\033[0m"
-	@# Analyze, elaborate and build exe from top level entity name
-	@# Top level entity name is same as that of filename by default
-	@# Specify top level entity name with the 'entity' parameter
-	$(ghdl) -m $(entity)
-
-.PHONY: run_simulation
-run_simulation: eval_if eval_entity eval_ghw $(in) $(entity)
-	@echo -e "\033[1m* Running simulation for \033[4m$(entity)\033[0m"
-	./$(entity) --wave=$(ghw)
-
-.PHONY: waveform
-waveform: eval_if eval_entity eval_ghw $(in) $(ghw)
-	@echo -e "\033[1m* Running gtkwave for \033[4m$(ghw)\033[0m"
-	@gtkwave $(ghw) -r ../common/gtkwaverc
+# check syntax of input file
 
 .PHONY: syntax
-syntax: $(in)
-	@echo -e "\033[1m* Checking syntax of \033[4m$(in)\033[0m"
-	@$(ghdl) -s $(in)
-	@echo -e "\u2714 Syntax is correct"
-
-.PHONY: make_tb
-make_tb: eval_if eval_entity $(in)
-	@echo -e "\033[1m* Making testbench for \033[4m$(in)\033[0m"
-	@sh -c "export in=$(in); export entity=$(entity); sh ../common/testbench_maker.sh"
-
-.PHONY: tb_and_make
-tb_and_make: make_tb 
-	@make import in=$(in) && make in=$(entity)_tb.vhdl
-
-$(ghw):
-
-$(entity): 
-
-.PHONY: eval_if
-eval_if:
-	@# Evaluating in name
-	$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+syntax:
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
 	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+	@echo -e "\033[1m* Checking syntax of \033[0m\033[3m$(in)\033[0m"
+	@$(ghdl) -s --std=$(std) $(in)
+	@echo -e "\u2714 Syntax is correct"
+	
 
-.PHONY: eval_entity
-eval_entity:
+
+
+# import input file into current working space
+
+.PHONY: import
+import: 
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+	@$(MAKE) --no-print-directory work-obj$(std).cf std=$(std) in=$(in)
+
+work-obj$(std).cf: $(in)	
+	@echo -e "\033[1m* Importing \033[0m\033[3m$(in)\033[0m\033[1m into current work cache\033[0m"
+	$(ghdl) -i --std=$(std) $(in)
+
+
+
+# output executable file
+
+.PHONY: build
+build: 
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
 	$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+endif
+	@$(MAKE) --no-print-directory $(entity) in=$(in) entity=$(entity) std=$(std) 
 
-.PHONY: eval_ghw
-eval_ghw:
+$(entity): $(in)
+	@#@echo $(filter-out $@,$(MAKECMDGOALS) | cut -f 2 -d ' ')
+	@echo -e "\033[1m* Building \033[0m\033[3m$(in)\033[0m"
+	@# Analyze, elaborate and build exe from top level entity name
+	@# Top level entity name is same as that of filename by default
+	@# Specify top level entity name with the 'entity' parameter
+	$(ghdl) -m --std=$(std) $(entity)
+
+
+
+
+
+.PHONY: run_simulation
+run_simulation:
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+ifeq ($(entity),0)
+	@# Evaluating entity name from input file name
+	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
+	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+endif
 	@# Evaluating waveform file name from input file name
-	$(eval ghw = $(shell echo "$(shell echo $(entity) | cut -f 1 -d '.')""_wave.ghw"))
+	@$(eval ghw = $(shell echo "$(shell echo $(entity) | cut -f 1 -d '.')""_wave.ghw"))
+	@echo -e "\033[1m* Running simulation for \033[0m\033[3m$(entity)\033[0m"
+	./$(entity) --wave=$(ghw)
+
+
+
+
+
+
+.PHONY: waveform
+waveform: 
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+ifeq ($(entity),0)
+	@# Evaluating entity name from input file name
+	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
+	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+endif
+	@# Evaluating waveform file name from input file name
+	@$(eval ghw = $(shell echo "$(shell echo $(entity) | cut -f 1 -d '.')""_wave.ghw"))
+	@echo -e "\033[1m* Running gtkwave for \033[0m\033[3m$(ghw)\033[0m"
+	@gtkwave $(ghw) -r ../common/gtkwaverc
+
+
+
+
+.PHONY: testbench
+testbench:
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+ifeq ($(entity),0)
+	@# Evaluating entity name from input file name
+	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
+	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+endif
+	@$(MAKE) --no-print-directory syntax in=$(in) std=$(std) 
+	@$(MAKE) --no-print-directory $(entity)_tb.vhdl entity=$(entity) in=$(in) std=$(std) 
+	@$(MAKE) --no-print-directory syntax in=$(entity)_tb.vhdl std=$(std) 
+
+
+$(entity)_tb.vhdl: $(in)
+	@echo -e "\033[1m* Making testbench for \033[0m\033[3m$(in)\033[0m"
+	@sh -c "export in=$(in); export entity=$(entity); sh ../common/testbench_maker.sh"
+
+
+
+.PHONY: get_entity_name
+get_entity_name:
+ifeq ($(in),0)
+	@# Evaluating input file name
+	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
+	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
+endif
+ifeq ($(entity),0)
+	@# Evaluating entity name from input file name
+	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
+	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+endif
+	@echo $(entity) > .entity_name
+
 
 # ~Subham Roy
-#  2017
+# 2017
