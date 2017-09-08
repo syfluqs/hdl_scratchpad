@@ -10,4 +10,4 @@ architecture behavioral of full_adder is
 begin
     s <= a xor b xor c;
     co <= (a and b) or ((a xor b) and c);
-end;
+end; 
