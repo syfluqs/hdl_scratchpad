@@ -72,9 +72,6 @@ ifeq ($(in),0)
 	@$(eval in = $(shell if [ $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | wc -l) -eq 1 ]; then echo $$(find . -type f \( -name '*.vhd' -o -name '*.vhdl' \) | cut -f 2- -d '.' | cut -f 2 -d '/') ; else echo "too_many_files_no_in_error_condition"; fi ))
 	@if [ $(in) == "too_many_files_no_in_error_condition" ]; then echo -e "\033[1mSpecify input VHDL file with the in parameter\033[0m" && exit 127; else exit 0; fi
 endif
-	@$(MAKE) --no-print-directory work-obj$(std).cf std=$(std) in=$(in)
-
-work-obj$(std).cf: $(in)	
 	@echo -e "\033[1m* Importing \033[0m\033[3m$(in)\033[0m\033[1m into current work cache\033[0m"
 	$(ghdl) -i --std=$(std) $(in)
 
@@ -92,7 +89,8 @@ endif
 ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
-	$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+	$(eval entity = $(shell cat $(in) | grep entity -m 1 | cut -f 2 -d ' '))
+	echo $(entity)
 endif
 	@$(MAKE) --no-print-directory $(entity) in=$(in) entity=$(entity) std=$(std) 
 
@@ -118,7 +116,7 @@ endif
 ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
-	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+	@$(eval entity = $(shell cat $(in) | grep entity -m 1 | cut -f 2 -d ' '))
 endif
 	@# Evaluating waveform file name from input file name
 	@$(eval ghw = $(shell echo "$(shell echo $(entity) | cut -f 1 -d '.')""_wave.ghw"))
@@ -140,7 +138,7 @@ endif
 ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
-	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+	@$(eval entity = $(shell cat $(in) | grep entity -m 1 | cut -f 2 -d ' '))
 endif
 	@# Evaluating waveform file name from input file name
 	@$(eval ghw = $(shell echo "$(shell echo $(entity) | cut -f 1 -d '.')""_wave.ghw"))
@@ -160,7 +158,7 @@ endif
 ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
-	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+	@$(eval entity = $(shell cat $(in) | grep entity -m 1 | cut -f 2 -d ' '))
 endif
 	@$(MAKE) --no-print-directory syntax in=$(in) std=$(std) 
 	@$(MAKE) --no-print-directory $(entity)_tb.vhdl entity=$(entity) in=$(in) std=$(std) 
@@ -183,7 +181,7 @@ endif
 ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
-	@$(eval entity = $(shell cat $(in) | grep entity | cut -f 2 -d ' '))
+	@$(eval entity = $(shell cat $(in) | grep entity -m 1 | cut -f 2 -d ' '))
 endif
 	@echo $(entity) > .entity_name
 

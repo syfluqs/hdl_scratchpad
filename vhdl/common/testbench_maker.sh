@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cat $in | sed 's/;/\n/g' | grep -w 'in' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > in_tokens_tempfile;
+cat $in | sed 's/port\s*//' | sed 's/(//g' | sed 's/;/\n/g' | grep -w 'in' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > in_tokens_tempfile;
 cat $in | sed 's/;/\n/g' | grep -w 'out' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > out_tokens_tempfile;
 let nin=$(cat in_tokens_tempfile | wc -l)-1;
 let nout=$(cat out_tokens_tempfile | wc -l)-1;
@@ -9,7 +9,7 @@ entity $(echo $entity)_tb is
 end $(echo $entity)_tb; \n
 architecture behavior of $(echo $entity)_tb is
 component $(echo $entity) is
-port (\n$(cat $in | grep 'in\|out' -w)
+port (\n$(cat $in | sed 's/port\s*(//' | sed 's/^\s*(//' | grep 'in\|out' -w)
 end component;\n
 signal input  : std_logic_vector($(echo $nin) downto 0);
 signal output  : std_logic_vector($(echo $nout) downto 0);\n

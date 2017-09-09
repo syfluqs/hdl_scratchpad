@@ -1,17 +1,25 @@
 #!/bin/zsh
 
 new_vhdl_proj() {
-    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1
+    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1 && echo "-- $1.vhdl\n-- author: $(whoami)\n-- created: $(date -I)\n\nlibrary ieee;\nuse ieee.std_logic_1164.all;\n\n" >> $1.vhdl
 }
 
 new_vhdl_project() {
-    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1
+    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1 && echo "-- $1.vhdl\n-- author: $(whoami)\n-- created: $(date -I)\n\nlibrary ieee;\nuse ieee.std_logic_1164.all;\n\n" >> $1.vhdl
 }
 
 vhdl_new_project() {
-    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1
+    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1 && echo "-- $1.vhdl\n-- author: $(whoami)\n-- created: $(date -I)\n\nlibrary ieee;\nuse ieee.std_logic_1164.all;\n\n" >> $1.vhdl
 }
 
 vhdl_new_proj() {
-    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1
+    mkdir $1 && ln -s ../common/makefile ./$1/makefile && cd $1 && echo "-- $1.vhdl\n-- author: $(whoami)\n-- created: $(date -I)\n\nlibrary ieee;\nuse ieee.std_logic_1164.all;\n\n" >> $1.vhdl
+}
+
+new_vhdl_file() {
+    if [[ -f $1 ]] then
+        echo "$1 already exists in current directory"
+    else
+        echo "-- $1.vhdl\n-- author: $(whoami)\n-- created: $(date -I)\n\nlibrary ieee;\nuse ieee.std_logic_1164.all;\n\n" >> $1
+    fi
 }
