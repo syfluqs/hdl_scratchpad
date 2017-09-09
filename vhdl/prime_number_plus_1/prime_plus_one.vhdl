@@ -9,11 +9,11 @@ entity prime is
 end prime;
 
 architecture arch of prime is
-    signal vec: std_logic_vector(3 downto 0);
     begin
-        process begin
-            wait on B1;
-            vec <= (B0,B1,B2,B3);
+        process (B0,B1,B2,B3)
+        variable vec: std_logic_vector(3 downto 0);
+        begin
+            vec := B3&B2&B1&B0;
             case vec is
             when x"1" | x"2" | x"3" | x"5" | x"7" | x"b" | x"d" => is_prime <= '1';
             when others => is_prime <= '0';
