@@ -13,6 +13,9 @@ make:
 	@$(MAKE) --no-print-directory run_simulation
 	@$(MAKE) --no-print-directory waveform
 
+.PHONY: auto
+auto:
+	@$(shell ./auto_cmd.sh >&2 )
 
 .PHONY: nowave
 nowave: 
@@ -90,7 +93,6 @@ ifeq ($(entity),0)
 	@# Evaluating entity name from input file name
 	@#$(eval entity = $(shell echo $(in) | cut -f 1 -d '.'))
 	$(eval entity = $(shell cat $(in) | grep entity -m 1 | cut -f 2 -d ' '))
-	echo $(entity)
 endif
 	@$(MAKE) --no-print-directory $(entity) in=$(in) entity=$(entity) std=$(std) 
 
