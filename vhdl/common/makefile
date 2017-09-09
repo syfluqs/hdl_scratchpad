@@ -15,7 +15,7 @@ make:
 
 .PHONY: auto
 auto:
-	@$(shell ./auto_cmd.sh >&2 )
+	@$(shell sh auto_cmd.sh >&2 )
 
 .PHONY: nowave
 nowave: 
