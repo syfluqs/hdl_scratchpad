@@ -5,9 +5,9 @@ entity half_adder_tb is
 end half_adder_tb; 
 
 architecture behavior of half_adder_tb is
-component half_adder is
+component half_adder is 
 port (
-    A,B: in std_logic; S,C: out std_logic);
+     A,B: in std_logic;S,C: out std_logic         );    
 end component;
 
 signal input  : std_logic_vector(1 downto 0);

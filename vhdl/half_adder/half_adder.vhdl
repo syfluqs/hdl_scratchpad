@@ -7,7 +7,7 @@ use ieee.std_logic_1164.all;
 
 entity half_adder is
     port (A,B: in std_logic;
-     S,C: out std_logic);
+        S,C: out std_logic);
 end half_adder;
 
 architecture struc of half_adder is
