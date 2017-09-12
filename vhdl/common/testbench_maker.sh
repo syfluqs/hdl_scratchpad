@@ -1,15 +1,15 @@
 #!/bin/sh
 
-cat $in | sed 's/port\s*//' | sed 's/(//g' | sed 's/;/\n/g' | grep -w 'in' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > in_tokens_tempfile;
-cat $in | sed 's/;/\n/g' | grep -w 'out' | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > out_tokens_tempfile;
+cat $in | sed 's/port\s*//' | sed 's/^\s*(//g' | sed 's/;/\n/g' | sed -e 's/architecture\s\+\w\+\s\+of\s\+\w\+\s\+is/\n/g' | sed 's/entity\s\+\w\+\s\+is/\n/g' | grep -w 'in' -m1 | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > in_tokens_tempfile;
+cat $in | sed 's/;/\n/g' | sed -e 's/architecture\s\+\w\+\s\+of\s\+\w\+\s\+is/\n/g' | sed 's/entity\s\+\w\+\s\+is/\n/g' | grep -w 'out' -m1 | cut -d ':' -f 1 | sed 's/\,/\n/g' | sed 's/ //g' > out_tokens_tempfile;
 let nin=$(cat in_tokens_tempfile | wc -l)-1;
 let nout=$(cat out_tokens_tempfile | wc -l)-1;
 echo -e "library ieee;\nuse ieee.std_logic_1164.all;\n
 entity $(echo $entity)_tb is
 end $(echo $entity)_tb; \n
 architecture behavior of $(echo $entity)_tb is
-component $(echo $entity) is
-port (\n$(cat $in | sed 's/port\s*(//' | sed 's/^\s*(//' | grep 'in\|out' -w)
+component $(echo $entity) is 
+port (\n$(cat $in | sed 's/port\s*(//' | sed 's/^\s*(//' | tr '\n' ' ' | sed -e 's/architecture\s\+\w\+\s\+of\s\+\w\+\s\+is/\n/g' | sed 's/entity\s\+\w\+\s\+is/\n/g' | grep 'in\|out' -w -m1 | sed 's/end\s\+\w\+\;//g')
 end component;\n
 signal input  : std_logic_vector($(echo $nin) downto 0);
 signal output  : std_logic_vector($(echo $nout) downto 0);\n
