@@ -7,7 +7,7 @@ use ieee.std_logic_1164.all;
 
 
 entity d_flipflop is
-    port (D, CLK: in std_logic; Q, Q_bar : out std_logic);
+    port (CLK, D: in std_logic; Q, Q_bar : out std_logic);
 end d_flipflop;
 
 architecture behav of d_flipflop is
@@ -19,3 +19,18 @@ begin
             q_bar <= not q;
     end process;
 end behav;
+
+architecture using_if of d_flipflop is
+begin
+    process(clk) begin
+        if (clk='1') then
+            if d='0' then
+                q<='0';
+                q_bar<='1';
+            elsif d='1' then
+                q<='1';
+                q_bar<='0';
+            end if;
+        end if;
+    end process;
+end using_if;
