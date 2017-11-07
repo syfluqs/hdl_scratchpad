@@ -47,7 +47,7 @@ test_entity_nowave: get_entity_name
 
 .PHONY: clean
 clean: 
-	@find . -type f ! \( -name '*.vhdl' -o -name '*.vhd' -o -name 'makefile' \) -delete
+	@find . -type f ! \( -name '*.vhdl' -o -name '*.vhd' -o -name 'makefile' -o -name 'auto_cmd.sh' \) -delete
 
 
 # check syntax of input file
