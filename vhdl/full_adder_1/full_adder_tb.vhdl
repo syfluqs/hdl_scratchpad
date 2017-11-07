@@ -10,6 +10,8 @@ port (
         a,b,c : in std_logic; s,co  : out std_logic);
 end component;
 
+for test_subject: full_adder use entity work.full_adder(structural);
+
 signal input  : std_logic_vector(2 downto 0);
 signal output  : std_logic_vector(1 downto 0);
 
