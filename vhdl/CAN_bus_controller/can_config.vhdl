@@ -3,6 +3,9 @@
 -- created: 2017-11-07
 -- description : Globally shared configuration
 
+library ieee;
+use ieee.std_logic_1164.all;
+
 package can_config is
     
     -- can_master config
@@ -26,4 +29,30 @@ package can_config is
     constant can_serializer_prop_delay: time := 0 ns;
     -- Description
     -- can_serializer_pulse_width : Pulse width time for each data bit
+
+    -- can_phy config
+    constant can_phy_dominant_bit: std_logic := '0';
+    constant can_phy_recessive_bit: std_logic := '1';
+
+    -- can_wire config
+    constant can_wire_analog_resolution: integer := 10;
+    constant can_wire_analog_max_val: integer := 950;
+    constant can_wire_analog_min_val: integer := 150;
+    constant can_wire_sampling_period: time := 0.25 ns;
+    constant can_wire_hi_k: real := 1.0;
+    constant can_wire_hi_a: real := 0.5;
+    constant can_wire_lo_k: real := 1.0;
+    constant can_wire_lo_a: real := 0.5;
+    -- Description
+    -- can_wire_resolution : resolution of can_wire analog signal representation
+    --                       in bits
+
+    -- can_equalizer config
+    constant can_equalizer_hi_k: real := 1.0;
+    constant can_equalizer_hi_a: real := 0.5;
+    constant can_equalizer_lo_k: real := 1.0;
+    constant can_equalizer_lo_a: real := 0.5;
+
+    --can_deserializer config
+    constant can_deserializer_prop_delay: time := 0 ns;
 end can_config;

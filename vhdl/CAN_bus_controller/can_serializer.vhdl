@@ -8,7 +8,7 @@ use ieee.std_logic_1164.all;
 use work.can_config.all;
 
 entity can_serializer is
-    port (stage_stream_in: in std_logic_vector(data_length+id_length+8-1 downto 0); 
+    port (stage_stream_in: in std_logic_vector(data_length+id_length+8+2-1 downto 0); 
           stage_serial_out: out std_logic;
           transmit_bar: in std_logic;
           stream_indicator: out std_logic);
@@ -23,7 +23,7 @@ end can_serializer;
 architecture can_serializer_arch of can_serializer is
 begin 
     process
-        constant stream_length: integer := data_length+id_length+8;
+        constant stream_length: integer := data_length+id_length+8+2;
         variable stream_bit_counter: integer := stream_length-1;
         variable in_str: std_logic_vector(stream_length-1 downto 0);
     begin
@@ -36,7 +36,7 @@ begin
                 wait for can_serializer_pulse_width;
                 stream_bit_counter := stream_bit_counter-1;
             end loop;
-            stage_serial_out <= 'Z';
+            stage_serial_out <= can_phy_recessive_bit;
             stream_indicator <= '1';
             stream_bit_counter := stream_length-1;
             in_str := (others => '0');

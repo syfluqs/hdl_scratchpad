@@ -6,9 +6,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.can_config.all;
+use work.can_subprograms.all;
 
 entity can_crc is
-    port (stage_stream_out : out std_logic_vector(data_length+id_length+8-1 downto 0);
+    port (stage_stream_out : out std_logic_vector(data_length+id_length+8+2-1 downto 0);
           stage_data_in : in std_logic_vector(data_length-1 downto 0);
           stage_id_in : in std_logic_vector(id_length-1 downto 0);
           receive_bar: in std_logic;
@@ -24,27 +25,31 @@ end can_crc;
 architecture arch_can_crc of can_crc is
 begin
     process
-        variable out_stream: std_logic_vector(data_length+id_length+8-1 downto 0);
+        variable out_stream: std_logic_vector(data_length+id_length+8+2-1 downto 0);
         variable crc_temp: std_logic_vector(7 downto 0):=(others => '0');
         variable count: integer:= 0;
     begin
         wait until falling_edge(receive_bar);
-            while count < data_length+7 loop
-                if (count < data_length) then
-                    crc_temp(0) := stage_data_in(count) xor crc_temp(7);
-                else 
-                    crc_temp(0) := '0' xor crc_temp(7);
-                end if;
-                crc_temp(1) := crc_temp(0) xor crc_temp(7);
-                crc_temp(2) := crc_temp(1) xor crc_temp(7);
-                crc_temp(7 downto 3) := crc_temp(6 downto 2);
-                count := count + 1;
-            end loop;
+            --while count < data_length+7 loop
+            --    if (count < data_length) then
+            --        crc_temp(0) := stage_data_in(count) xor crc_temp(7);
+                    
+            --    else 
+            --        crc_temp(0) := '0' xor crc_temp(7);
+            --    end if;
+            --    crc_temp(1) := crc_temp(0) xor crc_temp(7);
+            --    crc_temp(2) := crc_temp(1) xor crc_temp(7);
+            --    crc_temp(7 downto 3) := crc_temp(6 downto 2);
+            --    count := count + 1;
+            --end loop;
+            crc_temp := calc_crc(stage_data_in);
             wait for can_crc_calc_delay;
             count := 0;
-            out_stream(8-1 downto 0) := crc_temp;
-            out_stream(8+data_length-1 downto 8) := stage_data_in;
-            out_stream(id_length+8+data_length-1 downto 8+data_length) := stage_id_in;
+            out_stream(0) := can_phy_dominant_bit; -- start bit
+            out_stream(8 downto 1) := crc_temp;
+            out_stream(8+data_length downto 8+1) := stage_data_in;
+            out_stream(id_length+8+data_length downto 8+data_length+1) := stage_id_in;
+            out_stream(id_length+8+data_length) := can_phy_recessive_bit; -- stop bit
             stage_stream_out <= out_stream after can_crc_prop_delay;
             stage_transmit_ready <= '0' after can_crc_prop_delay;
             report "done";
